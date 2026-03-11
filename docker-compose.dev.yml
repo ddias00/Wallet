@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: wallet_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-wallet_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-wallet_pass}
+      POSTGRES_DB: ${DB_NAME:-wallet_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    networks:
+      - wallet_network_dev
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wallet_user -d wallet_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: wallet_api_dev
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      APP_ENV: development
+      APP_PORT: 8080
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-wallet_user}
+      DB_PASSWORD: ${DB_PASSWORD:-wallet_pass}
+      DB_NAME: ${DB_NAME:-wallet_db}
+      DB_SSLMODE: disable
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      JWT_ACCESS_EXPIRY: ${JWT_ACCESS_EXPIRY:-15m}
+      JWT_REFRESH_EXPIRY: ${JWT_REFRESH_EXPIRY:-168h}
+    volumes:
+      - .:/app
+      - /app/tmp
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - wallet_network_dev
+
+volumes:
+  postgres_data_dev:
+    driver: local
+
+networks:
+  wallet_network_dev:
+    driver: bridge
