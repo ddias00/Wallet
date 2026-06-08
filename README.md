@@ -202,12 +202,6 @@ Authorization: Bearer <access_token>
 - `POST /api/v1/auth/refresh` - Refresh access token
 - `GET /api/v1/auth/me` - Get current user profile (protected)
 
-#### Users
-
-- `GET /api/v1/users/:id` - Get user by ID (protected)
-- `POST /api/v1/users/block` - Block user account (protected)
-- `POST /api/v1/users/unblock` - Unblock user account (protected)
-
 #### Wallet
 
 - `GET /api/v1/wallet/balance` - Get wallet balance (protected)
@@ -217,15 +211,12 @@ Authorization: Bearer <access_token>
 #### Transactions
 
 - `POST /api/v1/transactions/transfer` - Transfer money (protected)
-- `GET /api/v1/transactions/history` - Get transaction history (protected)
-- `GET /api/v1/transactions/:id` - Get transaction by ID (protected)
+- `GET /api/v1/transactions` - Get transaction history with pagination (protected) — query params: `limit`, `offset`
 
 #### Payments
 
-- `POST /api/v1/payments/boleto` - Generate boleto (protected)
-- `POST /api/v1/payments/pix` - Generate PIX payment (protected)
-- `POST /api/v1/payments/qrcode` - Generate QR code payment (protected)
-- `POST /api/v1/payments/process` - Process payment (public - webhook)
+- `POST /api/v1/boleto` - Generate boleto (protected) — body: `{ "amount": 500.00 }`
+- `POST /api/v1/pix` - Create PIX payment (protected) — body: `{ "pix_key": "...", "amount": 100.00 }`. **Nota:** requer que a chave PIX do destinatário já exista na tabela `pix_keys`; o CRUD de chaves PIX via API é trabalho futuro.
 
 ### Example Requests
 

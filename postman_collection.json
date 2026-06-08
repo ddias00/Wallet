@@ -1,19 +1,69 @@
 {
   "info": {
     "name": "Digital Wallet API",
-    "description": "Complete API collection for Digital Wallet platform",
+    "description": "Complete API collection for Digital Wallet platform — paths reais (corrigidos em 07/06/2026)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
+    { "key": "baseUrl",      "value": "http://localhost:8080", "type": "string" },
+    { "key": "accessToken",  "value": "", "type": "string" },
+    { "key": "refreshToken", "value": "", "type": "string" },
+    { "key": "aliceId",      "value": "", "type": "string" },
+    { "key": "bobId",        "value": "", "type": "string" },
+    { "key": "bobEmail",     "value": "bob@wallet.com", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [ { "key": "token", "value": "{{accessToken}}", "type": "string" } ]
+  },
+  "event": [
     {
-      "key": "baseUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
-    },
-    {
-      "key": "accessToken",
-      "value": "",
-      "type": "string"
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Auto-refresh do JWT: se o access_token expira em <60s, chama /auth/refresh.",
+          "const skipFor = ['/auth/login', '/auth/register', '/auth/refresh', '/health'];",
+          "const url = (pm.request && pm.request.url) ? pm.request.url.toString() : '';",
+          "if (skipFor.some(p => url.indexOf(p) !== -1)) { return; }",
+          "",
+          "const access  = pm.collectionVariables.get('accessToken');",
+          "const refresh = pm.collectionVariables.get('refreshToken');",
+          "if (!access || !refresh) { return; }",
+          "",
+          "function decodeExp(jwt) {",
+          "  try {",
+          "    let p = jwt.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');",
+          "    while (p.length % 4) { p += '='; }",
+          "    const json = JSON.parse(atob(p));",
+          "    return json.exp || 0;",
+          "  } catch (e) { return 0; }",
+          "}",
+          "",
+          "const exp = decodeExp(access);",
+          "const now = Math.floor(Date.now() / 1000);",
+          "if (exp - now > 60) { return; } // ainda válido por >60s",
+          "",
+          "const baseUrl = pm.collectionVariables.get('baseUrl');",
+          "console.log('[auto-refresh] token expirando, renovando...');",
+          "pm.sendRequest({",
+          "  url: baseUrl + '/api/v1/auth/refresh',",
+          "  method: 'POST',",
+          "  header: { 'Content-Type': 'application/json' },",
+          "  body: { mode: 'raw', raw: JSON.stringify({ refresh_token: refresh }) }",
+          "}, function (err, res) {",
+          "  if (err) { console.error('[auto-refresh] erro:', err); return; }",
+          "  const j = res.json();",
+          "  if (j && j.data && j.data.access_token) {",
+          "    pm.collectionVariables.set('accessToken',  j.data.access_token);",
+          "    pm.collectionVariables.set('refreshToken', j.data.refresh_token);",
+          "    console.log('[auto-refresh] token renovado com sucesso');",
+          "  } else {",
+          "    console.warn('[auto-refresh] resposta inesperada:', res.text());",
+          "  }",
+          "});"
+        ]
+      }
     }
   ],
   "item": [
@@ -21,61 +71,172 @@
       "name": "Auth",
       "item": [
         {
-          "name": "Register",
+          "name": "Register Alice",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"cpf\": \"12345678909\",\n  \"email\": \"john@example.com\",\n  \"phone\": \"11987654321\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"name\": \"Alice Silva\",\n  \"cpf\": \"05118942527\",\n  \"email\": \"alice@wallet.com\",\n  \"phone\": \"11987654321\",\n  \"password\": \"Senha@123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/register",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "register"]
+              "path": ["api","v1","auth","register"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.id) {",
+                  "  pm.collectionVariables.set('aliceId', j.data.id);",
+                  "  console.log('aliceId salvo:', j.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
-          "name": "Login",
+          "name": "Register Bob",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"name\": \"Bob Costa\",\n  \"cpf\": \"01690798807\",\n  \"email\": \"bob@wallet.com\",\n  \"phone\": \"11912345678\",\n  \"password\": \"Senha@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","v1","auth","register"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.id) {",
+                  "  pm.collectionVariables.set('bobId', j.data.id);",
+                  "  pm.collectionVariables.set('bobEmail', j.data.email);",
+                  "  console.log('bobId salvo:', j.data.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login (Alice)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@wallet.com\",\n  \"password\": \"Senha@123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/login",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "login"]
+              "path": ["api","v1","auth","login"]
             }
-          }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', j.data.access_token);",
+                  "  pm.collectionVariables.set('refreshToken', j.data.refresh_token);",
+                  "  console.log('accessToken atualizado');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
         },
         {
-          "name": "Get Profile",
+          "name": "Login (Bob)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"bob@wallet.com\",\n  \"password\": \"Senha@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","v1","auth","login"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', j.data.access_token);",
+                  "  pm.collectionVariables.set('refreshToken', j.data.refresh_token);",
+                  "  console.log('accessToken atualizado (Bob)');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","v1","auth","refresh"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const j = pm.response.json();",
+                  "if (j && j.data && j.data.access_token) {",
+                  "  pm.collectionVariables.set('accessToken', j.data.access_token);",
+                  "  pm.collectionVariables.set('refreshToken', j.data.refresh_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Profile (/me)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
+            "header": [ { "key": "Authorization", "value": "Bearer {{accessToken}}" } ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/auth/me",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "auth", "me"]
+              "path": ["api","v1","auth","me"]
             }
           }
         }
@@ -88,16 +249,11 @@
           "name": "Get Balance",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
+            "header": [ { "key": "Authorization", "value": "Bearer {{accessToken}}" } ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/wallet/balance",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "wallet", "balance"]
+              "path": ["api","v1","wallet","balance"]
             }
           }
         },
@@ -106,23 +262,17 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 100.00\n}"
+              "raw": "{\n  \"amount\": 1000.00,\n  \"description\": \"Carga inicial\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/wallet/credit",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "wallet", "credit"]
+              "path": ["api","v1","wallet","credit"]
             }
           }
         },
@@ -131,23 +281,17 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 50.00\n}"
+              "raw": "{\n  \"amount\": 50.00,\n  \"description\": \"Debito de teste\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/wallet/debit",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "wallet", "debit"]
+              "path": ["api","v1","wallet","debit"]
             }
           }
         }
@@ -157,53 +301,100 @@
       "name": "Transactions",
       "item": [
         {
-          "name": "Transfer",
+          "name": "Transfer (Alice -> Bob)",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"to_user_id\": \"uuid-here\",\n  \"amount\": 50.00,\n  \"description\": \"Payment for services\"\n}"
+              "raw": "{\n  \"to_user_id\": \"{{bobId}}\",\n  \"amount\": 250.00,\n  \"description\": \"Pagamento de almoco\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/api/v1/transactions/transfer",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "transactions", "transfer"]
+              "path": ["api","v1","transactions","transfer"]
+            },
+            "description": "Requer accessToken da ALICE. Se vier 'cannot transfer to yourself', rode 'Auth -> Login (Alice)' antes."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Garante que o token logado é da Alice (senao da 'cannot transfer to yourself').",
+                  "const tk = pm.collectionVariables.get('accessToken');",
+                  "const aliceId = pm.collectionVariables.get('aliceId');",
+                  "if (tk && aliceId) {",
+                  "  try {",
+                  "    let p = tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');",
+                  "    while (p.length % 4) p += '=';",
+                  "    const uid = JSON.parse(atob(p)).user_id;",
+                  "    if (uid !== aliceId) {",
+                  "      throw new Error('Token atual nao e da Alice (user_id=' + uid + '). Rode Login (Alice) antes.');",
+                  "    }",
+                  "  } catch (e) { throw e; }",
+                  "}"
+                ]
+              }
             }
-          }
+          ]
         },
         {
-          "name": "Get History",
+          "name": "Transfer (Bob -> Alice)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to_user_id\": \"{{aliceId}}\",\n  \"amount\": 50.00,\n  \"description\": \"Devolucao do almoco\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/transactions/transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","v1","transactions","transfer"]
+            },
+            "description": "Requer accessToken do BOB. Rode 'Auth -> Login (Bob)' antes."
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const tk = pm.collectionVariables.get('accessToken');",
+                  "const bobId = pm.collectionVariables.get('bobId');",
+                  "if (tk && bobId) {",
+                  "  let p = tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');",
+                  "  while (p.length % 4) p += '=';",
+                  "  const uid = JSON.parse(atob(p)).user_id;",
+                  "  if (uid !== bobId) {",
+                  "    throw new Error('Token atual nao e do Bob (user_id=' + uid + '). Rode Login (Bob) antes.');",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get History (extrato)",
           "request": {
             "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              }
-            ],
+            "header": [ { "key": "Authorization", "value": "Bearer {{accessToken}}" } ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/transactions/history?limit=10&offset=0",
+              "raw": "{{baseUrl}}/api/v1/transactions?limit=10&offset=0",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "transactions", "history"],
+              "path": ["api","v1","transactions"],
               "query": [
-                {
-                  "key": "limit",
-                  "value": "10"
-                },
-                {
-                  "key": "offset",
-                  "value": "0"
-                }
+                { "key": "limit",  "value": "10" },
+                { "key": "offset", "value": "0" }
               ]
             }
           }
@@ -214,77 +405,57 @@
       "name": "Payments",
       "item": [
         {
+          "name": "PIX Payment (Alice -> Bob)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pix_key\": \"{{bobEmail}}\",\n  \"amount\": 100.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/pix",
+              "host": ["{{baseUrl}}"],
+              "path": ["api","v1","pix"]
+            },
+            "description": "Requer que a chave PIX do destinatario ja exista na tabela pix_keys. Use o SQL de seed do DEMO-CHECKLIST.md passo 0.3."
+          }
+        },
+        {
           "name": "Generate Boleto",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" },
+              { "key": "Content-Type", "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 100.00\n}"
+              "raw": "{\n  \"amount\": 500.00\n}"
             },
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/boleto",
+              "raw": "{{baseUrl}}/api/v1/boleto",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "payments", "boleto"]
+              "path": ["api","v1","boleto"]
             }
           }
-        },
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
         {
-          "name": "Generate PIX",
+          "name": "Health Check",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 100.00\n}"
-            },
+            "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/pix",
+              "raw": "{{baseUrl}}/health",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "payments", "pix"]
-            }
-          }
-        },
-        {
-          "name": "Generate QR Code",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{accessToken}}"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"amount\": 100.00\n}"
-            },
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/payments/qrcode",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "payments", "qrcode"]
+              "path": ["health"]
             }
           }
         }
