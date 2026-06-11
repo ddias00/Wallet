@@ -1,20 +1,20 @@
-# Development Dockerfile with hot reload
+# Development Dockerfile com hot reload via Air.
+# Esperado ser usado com docker-compose.dev.yml, que monta o
+# codigo fonte como volume (.:/app) por cima desta imagem.
 FROM golang:1.25-alpine
 
-# Install air for hot reload
-RUN go install github.com/cosmtrek/air@latest
+# Air observa arquivos e recompila a cada save.
+# O modulo migrou de cosmtrek/air para air-verse/air.
+RUN go install github.com/air-verse/air@latest
 
 WORKDIR /app
 
-# Copy go mod files
+# Pre-baixa as dependencias para o cache do container.
+# O codigo fonte vem por volume mount em runtime, entao
+# nao copiamos o resto da arvore aqui (seria sobrescrito).
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
-COPY . .
-
-# Expose port
 EXPOSE 8080
 
-# Run with air
 CMD ["air", "-c", ".air.toml"]
