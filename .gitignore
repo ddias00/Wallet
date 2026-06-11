@@ -10,8 +10,11 @@ dist/
 # Test binary
 *.test
 
-# Output of the go coverage tool
+# Coverage (Go cover tool output)
 *.out
+coverage
+coverage.*
+coverage_*
 
 # Dependency directories
 vendor/
@@ -36,9 +39,14 @@ Thumbs.db
 # Logs
 *.log
 
+# Air hot-reload
+tmp/
+build-errors.log
+
 # Swagger docs (generated)
 docs/docs.go
 docs/swagger.json
 docs/swagger.yaml
 
+# TCC artifacts (não versionar trabalhos acadêmicos)
 tcc/

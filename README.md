@@ -1,152 +1,126 @@
 # Digital Wallet API
 
-A complete REST API for a Digital Wallet platform built with Golang, following Clean Architecture principles.
+API REST completa para uma plataforma de carteira digital, construída em Go seguindo os princípios da Clean Architecture.
 
-## 🚀 Features
+## Features
 
-### User Management
-- User registration with CPF, email, phone validation
-- JWT-based authentication with refresh tokens
-- Account blocking/unblocking
+### Gestão de Usuários
+- Cadastro com validação de CPF, e-mail e telefone
+- Autenticação JWT com refresh tokens
+- Bloqueio/desbloqueio de conta
 
-### Wallet Operations
-- Get wallet balance
-- Credit wallet
-- Debit wallet
+### Operações de Carteira
+- Consulta de saldo
+- Crédito
+- Débito
 
-### Transactions
-- Transfer money between users
-- Transaction history with pagination
-- Transaction status tracking (pending, confirmed, cancelled)
+### Transações
+- Transferência entre usuários
+- Histórico paginado
+- Status (pending, confirmed, cancelled)
 
-### Payments
-- Generate Boleto
-- PIX payment support
-- QR Code payment generation
-- Payment processing
+### Pagamentos
+- Geração de boleto
+- Pagamento via PIX
+- QR Code
 
-### Notifications
-- Transaction notifications (console-based, ready for email/SMS integration)
+### Notificações
+- Notificações de transação (console-based, pronto para integração com e-mail/SMS)
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Language**: Go 1.21
-- **Framework**: Gin
-- **Database**: PostgreSQL
+- **Linguagem**: Go 1.25
+- **Framework HTTP**: Gin
+- **Banco de dados**: PostgreSQL 15
 - **ORM**: GORM
-- **Authentication**: JWT with refresh tokens
-- **Password Hashing**: bcrypt
-- **API Documentation**: Swagger/OpenAPI
-- **Containerization**: Docker & Docker Compose
-- **Migrations**: golang-migrate compatible
+- **Autenticação**: JWT com refresh tokens
+- **Hash de senhas**: bcrypt
+- **Documentação**: Swagger/OpenAPI
+- **Containerização**: Docker & Docker Compose
+- **Hot reload (dev)**: Air
+- **Migrations**: compatível com golang-migrate
 
-## 📁 Project Structure
+## Estrutura do Projeto
 
 ```
 Wallet/
 ├── cmd/
 │   └── api/
-│       └── main.go              # Application entry point
+│       └── main.go              # Entry point
 ├── internal/
-│   ├── config/
-│   │   └── config.go            # Configuration management
-│   ├── domain/                  # Domain models/entities
-│   │   ├── user.go
-│   │   ├── wallet.go
-│   │   ├── transaction.go
-│   │   └── payment.go
-│   ├── handler/                 # HTTP handlers
-│   │   ├── auth_handler.go
-│   │   ├── user_handler.go
-│   │   ├── wallet_handler.go
-│   │   ├── transaction_handler.go
-│   │   └── payment_handler.go
-│   ├── service/                 # Business logic
-│   │   ├── auth_service.go
-│   │   ├── user_service.go
-│   │   ├── wallet_service.go
-│   │   ├── transaction_service.go
-│   │   ├── payment_service.go
-│   │   └── notification_service.go
-│   ├── repository/              # Data access layer
-│   │   ├── user_repository.go
-│   │   ├── wallet_repository.go
-│   │   ├── transaction_repository.go
-│   │   ├── payment_repository.go
-│   │   └── refresh_token_repository.go
-│   ├── middleware/              # HTTP middleware
-│   │   ├── auth.go
-│   │   └── logging.go
-│   └── utils/
-│       └── response.go          # Response helpers
+│   ├── config/                  # Configuração
+│   ├── domain/                  # Entidades de domínio
+│   ├── handler/                 # Handlers HTTP
+│   ├── service/                 # Regras de negócio
+│   ├── repository/              # Camada de acesso a dados
+│   ├── middleware/              # Auth, logging
+│   └── utils/                   # Helpers
 ├── pkg/
-│   ├── jwt/
-│   │   └── jwt.go               # JWT utilities
-│   └── validator/
-│       └── validator.go         # CPF, email, phone validators
-├── migrations/                  # Database migrations
-│   ├── 000001_init_schema.up.sql
-│   └── 000001_init_schema.down.sql
-├── docs/                        # Swagger documentation (generated)
+│   ├── jwt/                     # Utilitários JWT
+│   └── validator/               # Validadores (CPF, e-mail, telefone)
+├── migrations/                  # Migrations SQL
+├── docs/                        # Documentação Swagger (gerada)
+├── scripts/                     # Scripts utilitários, smoke tests, demo e Postman collection
+├── test/                        # Testes de integração
 ├── docker-compose.yml
+├── docker-compose.dev.yml       # Stack com hot reload
 ├── Dockerfile
+├── Dockerfile.dev
 ├── Makefile
 ├── go.mod
-├── go.sum
 ├── .env.example
-├── .gitignore
 └── README.md
 ```
 
-## 🔧 Prerequisites
+## Pré-requisitos
 
-- Go 1.21 or higher
-- Docker and Docker Compose
-- PostgreSQL 15 (if running locally without Docker)
-- golang-migrate (optional, for manual migrations)
+- Go 1.25 ou superior
+- Docker e Docker Compose
+- PostgreSQL 15 (se rodar localmente sem Docker)
+- golang-migrate (opcional, para migrations manuais)
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Clone the repository
+### 1. Clone o repositório
 
 ```bash
 git clone <repository-url>
 cd Wallet
 ```
 
-### 2. Set up environment variables
+### 2. Configure as variáveis de ambiente
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` with your configuration if needed.
+Edite o `.env` conforme necessário.
 
-### 3. Run with Docker Compose (Recommended)
+### 3. Suba tudo com Docker Compose (recomendado)
 
 ```bash
 docker-compose up -d
 ```
 
-This will start:
-- PostgreSQL database on port 5432
-- API server on port 8080
+Isso vai subir:
+- PostgreSQL na porta `5432`
+- API na porta `8080`
 
-### 4. Access the API
+### 4. Acesse a API
 
-- API Base URL: `http://localhost:8080`
-- Swagger Documentation: `http://localhost:8080/swagger/index.html`
-- Health Check: `http://localhost:8080/health`
+- Base URL: `http://localhost:8080`
+- Swagger: `http://localhost:8080/swagger/index.html`
+- Health check: `http://localhost:8080/health`
 
-## 🔨 Development Setup
+## Desenvolvimento
 
-### Install dependencies
+### Instalar dependências
 
 ```bash
 go mod download
 ```
 
-### Run PostgreSQL locally
+### Rodar PostgreSQL localmente (sem docker-compose)
 
 ```bash
 docker run --name wallet_postgres \
@@ -157,70 +131,83 @@ docker run --name wallet_postgres \
   -d postgres:15-alpine
 ```
 
-### Run migrations (optional - auto-migrated on startup)
-
-```bash
-make migrate-up
-```
-
-### Run the application
+### Rodar a aplicação
 
 ```bash
 make run
-# or
+# ou
 go run cmd/api/main.go
 ```
 
-### Generate Swagger documentation
+### Hot reload com Air (modo dev)
+
+```bash
+make docker-dev
+```
+
+### Gerar documentação Swagger
 
 ```bash
 make swagger
 ```
 
-### Run tests
+### Rodar testes
 
 ```bash
-make test
+make test            # todos os testes
+make coverage        # gera coverage.html
+make coverage-func   # mostra coverage no terminal
 ```
 
-## 📚 API Documentation
+## Scripts e ferramentas
 
-### Authentication
+Estão em `scripts/` (entre por lá pra ver detalhes). Resumo:
 
-All protected endpoints require a Bearer token in the Authorization header:
+| Arquivo | Plataforma | O que faz |
+|---------|-----------|-----------|
+| `setup.bat` / `setup.sh` | Windows / Linux+Mac | Checa Go, baixa deps, valida Docker |
+| `test_api.ps1` / `test_api.sh` | Windows / Linux+Mac | Smoke test end-to-end da API (register → login → balance → credit) |
+| `reset-demo.ps1` | Windows | Reseta banco, cria Alice e Bob, semeia chave PIX (TCC) |
+| `postman_collection.json` | Postman / Insomnia / Bruno | Coleção completa dos endpoints — `File → Import` no Postman |
+
+## Documentação da API
+
+### Autenticação
+
+Endpoints protegidos exigem o header:
 
 ```
 Authorization: Bearer <access_token>
 ```
 
-### API Endpoints
+### Endpoints
 
 #### Auth
 
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login user
-- `POST /api/v1/auth/refresh` - Refresh access token
-- `GET /api/v1/auth/me` - Get current user profile (protected)
+- `POST /api/v1/auth/register` — cadastra novo usuário
+- `POST /api/v1/auth/login` — autentica
+- `POST /api/v1/auth/refresh` — renova o access token
+- `GET /api/v1/auth/me` — perfil do usuário (protected)
 
 #### Wallet
 
-- `GET /api/v1/wallet/balance` - Get wallet balance (protected)
-- `POST /api/v1/wallet/credit` - Credit wallet (protected)
-- `POST /api/v1/wallet/debit` - Debit wallet (protected)
+- `GET /api/v1/wallet/balance` — consulta saldo (protected)
+- `POST /api/v1/wallet/credit` — credita (protected)
+- `POST /api/v1/wallet/debit` — debita (protected)
 
 #### Transactions
 
-- `POST /api/v1/transactions/transfer` - Transfer money (protected)
-- `GET /api/v1/transactions` - Get transaction history with pagination (protected) — query params: `limit`, `offset`
+- `POST /api/v1/transactions/transfer` — transferência (protected)
+- `GET /api/v1/transactions` — histórico paginado (protected) — query params: `limit`, `offset`
 
 #### Payments
 
-- `POST /api/v1/boleto` - Generate boleto (protected) — body: `{ "amount": 500.00 }`
-- `POST /api/v1/pix` - Create PIX payment (protected) — body: `{ "pix_key": "...", "amount": 100.00 }`. **Nota:** requer que a chave PIX do destinatário já exista na tabela `pix_keys`; o CRUD de chaves PIX via API é trabalho futuro.
+- `POST /api/v1/boleto` — gera boleto (protected) — body: `{ "amount": 500.00 }`
+- `POST /api/v1/pix` — paga via PIX (protected) — body: `{ "pix_key": "...", "amount": 100.00 }`. **Nota:** requer que a chave PIX do destinatário já exista na tabela `pix_keys`; o CRUD de chaves PIX via API é trabalho futuro.
 
-### Example Requests
+### Exemplos
 
-#### Register User
+#### Register
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/auth/register \
@@ -245,14 +232,14 @@ curl -X POST http://localhost:8080/api/v1/auth/login \
   }'
 ```
 
-#### Get Balance
+#### Balance
 
 ```bash
 curl -X GET http://localhost:8080/api/v1/wallet/balance \
   -H "Authorization: Bearer <access_token>"
 ```
 
-#### Transfer Money
+#### Transferência
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/transactions/transfer \
@@ -265,110 +252,82 @@ curl -X POST http://localhost:8080/api/v1/transactions/transfer \
   }'
 ```
 
-## 🧪 Testing
-
-Run all tests:
+## Docker
 
 ```bash
-make test
+make docker-up        # sobe API + Postgres
+make docker-down      # derruba
+make docker-logs      # logs da API
+make docker-rebuild   # rebuild + restart
+make docker-dev       # stack com hot reload
 ```
 
-Run tests with coverage:
+## Variáveis de ambiente
 
-```bash
-go test -v -cover ./...
-```
+| Variável | Descrição | Default |
+|----------|-----------|---------|
+| `APP_ENV` | Ambiente | `development` |
+| `APP_PORT` | Porta do servidor | `8080` |
+| `DB_HOST` | Host do banco | `localhost` |
+| `DB_PORT` | Porta do banco | `5432` |
+| `DB_USER` | Usuário do banco | `wallet_user` |
+| `DB_PASSWORD` | Senha do banco | `wallet_pass` |
+| `DB_NAME` | Nome do banco | `wallet_db` |
+| `DB_SSLMODE` | SSL mode | `disable` |
+| `JWT_SECRET` | Segredo do JWT | `your-secret-key` |
+| `JWT_ACCESS_EXPIRY` | Expiração do access token | `15m` |
+| `JWT_REFRESH_EXPIRY` | Expiração do refresh token | `7d` |
+| `BCRYPT_COST` | Custo do bcrypt | `10` |
 
-## 🐳 Docker Commands
+## Arquitetura
 
-Build and start containers:
+Projeto segue **Clean Architecture**:
 
-```bash
-make docker-up
-```
+- **Domain Layer** — entidades e regras de negócio centrais
+- **Repository Layer** — abstração de acesso a dados
+- **Service Layer** — implementação das regras de negócio
+- **Handler Layer** — recepção/resposta HTTP
+- **Middleware** — autenticação, logging e demais cross-cutting concerns
 
-Stop containers:
-
-```bash
-make docker-down
-```
-
-View logs:
-
-```bash
-docker-compose logs -f api
-```
-
-## 📝 Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| APP_ENV | Application environment | development |
-| APP_PORT | Server port | 8080 |
-| DB_HOST | Database host | localhost |
-| DB_PORT | Database port | 5432 |
-| DB_USER | Database user | wallet_user |
-| DB_PASSWORD | Database password | wallet_pass |
-| DB_NAME | Database name | wallet_db |
-| DB_SSLMODE | Database SSL mode | disable |
-| JWT_SECRET | JWT secret key | your-secret-key |
-| JWT_ACCESS_EXPIRY | Access token expiry | 15m |
-| JWT_REFRESH_EXPIRY | Refresh token expiry | 7d |
-| BCRYPT_COST | Bcrypt hashing cost | 10 |
-
-## 🏗️ Architecture
-
-This project follows **Clean Architecture** principles:
-
-- **Domain Layer**: Core business entities and rules
-- **Repository Layer**: Data access abstraction
-- **Service Layer**: Business logic implementation
-- **Handler Layer**: HTTP request/response handling
-- **Middleware**: Cross-cutting concerns (auth, logging)
-
-### Key Design Patterns
+### Padrões aplicados
 
 - Repository Pattern
 - Dependency Injection
-- Interface-based design
-- Separation of Concerns
+- Programação por interfaces
+- Separação de responsabilidades
 
-## 🔒 Security Features
+## Segurança
 
-- Password hashing with bcrypt
-- JWT-based authentication
-- Refresh token rotation
-- CPF, email, and phone validation
-- Account blocking mechanism
-- SQL injection prevention (GORM)
+- Hash de senha com bcrypt
+- Autenticação JWT
+- Rotação de refresh token
+- Validação de CPF, e-mail e telefone
+- Mecanismo de bloqueio de conta
+- Prevenção de SQL injection (GORM)
 
-## 🚧 Future Enhancements
+## Roadmap
 
-- [ ] Email/SMS notification integration
+- [ ] Integração com e-mail/SMS para notificações
 - [ ] Rate limiting
-- [ ] API key authentication for webhooks
-- [ ] Transaction rollback mechanism
+- [ ] API key para webhooks
+- [ ] Mecanismo de rollback de transações
 - [ ] Audit logging
-- [ ] Multi-currency support
-- [ ] KYC integration
-- [ ] 2FA authentication
+- [ ] Multi-currency
+- [ ] Integração com KYC
+- [ ] 2FA
 
-## 📄 License
+## Licença
 
 MIT License
 
-## 👥 Contributing
+## Contribuindo
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-For support, email support@wallet.com or open an issue in the repository.
+1. Fork
+2. Crie sua branch (`git checkout -b feature/amazing-feature`)
+3. Commit (`git commit -m 'feat: amazing feature'`)
+4. Push (`git push origin feature/amazing-feature`)
+5. Abra um Pull Request
 
 ---
 
-Built with ❤️ using Go and Clean Architecture
+Construído com Go e Clean Architecture.

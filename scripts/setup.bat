@@ -7,7 +7,7 @@ echo.
 echo [1/5] Checking Go installation...
 go version
 if %errorlevel% neq 0 (
-    echo ERROR: Go is not installed. Please install Go 1.21 or higher.
+    echo ERROR: Go is not installed. Please install Go 1.25 or higher.
     exit /b 1
 )
 echo.

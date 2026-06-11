@@ -7,7 +7,7 @@ echo ""
 
 echo "[1/5] Checking Go installation..."
 if ! command -v go &> /dev/null; then
-    echo "ERROR: Go is not installed. Please install Go 1.21 or higher."
+    echo "ERROR: Go is not installed. Please install Go 1.25 or higher."
     exit 1
 fi
 go version

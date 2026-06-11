@@ -1,29 +1,55 @@
-.PHONY: run build test test-coverage clean docker-up docker-down docker-dev docker-logs swagger deps
+.PHONY: run build deps swagger clean \
+        test test-verbose test-short test-service test-handler test-repository \
+        coverage coverage-func \
+        docker-up docker-down docker-logs docker-rebuild docker-dev docker-dev-down
 
+# ----- App -----
 run:
 	go run cmd/api/main.go
 
 build:
 	go build -o bin/api cmd/api/main.go
 
-test:
-	go test -v ./test/...
-
-test-coverage:
-	go test -v -coverprofile=coverage.out ./test/...
-	go tool cover -html=coverage.out -o coverage.html
-
-test-report:
-	go test -v -coverprofile=coverage.out ./test/...
-	go tool cover -func=coverage.out
+deps:
+	go mod download
+	go mod tidy
 
 swagger:
 	swag init -g cmd/api/main.go -o docs
 
 clean:
-	rm -rf bin/ coverage.out coverage.html tmp/
+	rm -rf bin/ tmp/ coverage coverage.out coverage.html coverage_*
 
-# Docker Production
+# ----- Tests -----
+test:
+	go test ./... -v
+
+test-verbose:
+	go test ./... -v -cover
+
+test-short:
+	go test ./... -short -v
+
+test-service:
+	go test ./internal/service/... -v -cover
+
+test-handler:
+	go test ./internal/handler/... -v -cover
+
+test-repository:
+	go test ./internal/repository/... -v -cover
+
+# ----- Coverage -----
+coverage:
+	go test ./... -coverprofile=coverage.out -covermode=atomic
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report: coverage.html"
+
+coverage-func:
+	go test ./... -coverprofile=coverage.out
+	go tool cover -func=coverage.out
+
+# ----- Docker (prod) -----
 docker-up:
 	docker-compose up -d
 
@@ -36,14 +62,9 @@ docker-logs:
 docker-rebuild:
 	docker-compose up -d --build
 
-# Docker Development (Hot Reload)
+# ----- Docker (dev, hot reload via Air) -----
 docker-dev:
 	docker-compose -f docker-compose.dev.yml up
 
 docker-dev-down:
 	docker-compose -f docker-compose.dev.yml down
-
-# Dependencies
-deps:
-	go mod download
-	go mod tidy
