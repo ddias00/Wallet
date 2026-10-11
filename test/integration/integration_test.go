@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/wallet/internal/dto"
@@ -25,10 +26,12 @@ func setupAPI(t *testing.T) *gin.Engine {
 		t.Fatal(err)
 	}
 
-	db.AutoMigrate(&model.User{}, &model.Wallet{}, &model.Transaction{}, &model.PixKey{}, &model.Boleto{}, &model.RefreshToken{})
+	if err := db.AutoMigrate(&model.User{}, &model.Wallet{}, &model.Transaction{}, &model.PixKey{}, &model.Boleto{}, &model.RefreshToken{}); err != nil {
+		t.Fatal(err)
+	}
 
 	repo := repository.New(db)
-	svc := service.New(repo, "secret", 0, 0)
+	svc := service.New(repo, "secret", 15*time.Minute, 24*time.Hour)
 	h := handler.New(svc)
 
 	r := gin.Default()
@@ -66,7 +69,7 @@ func TestAPIRegisterLogin(t *testing.T) {
 
 	var loginResp dto.Response
 	json.Unmarshal(w.Body.Bytes(), &loginResp)
-	
+
 	tokenData := loginResp.Data.(map[string]interface{})
 	token := tokenData["access_token"].(string)
 

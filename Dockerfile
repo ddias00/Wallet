@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.25-alpine AS builder
+FROM golang:1.27.2-alpine AS builder
 
 # Install dependencies
 RUN apk add --no-cache git ca-certificates tzdata
@@ -15,7 +15,7 @@ RUN go mod download
 RUN go mod verify
 
 # Install swag
-RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN go install github.com/swaggo/swag/cmd/swag@v1.16.6
 
 # Copy source code
 COPY . .
@@ -57,7 +57,7 @@ EXPOSE 8080
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD ["/app/api", "health"] || exit 1
+    CMD ["/app/api", "health"]
 
 # Run
 ENTRYPOINT ["/app/api"]

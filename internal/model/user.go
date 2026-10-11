@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:(gen_random_uuid())" json:"id"`
 	Name      string    `gorm:"not null" json:"name"`
 	CPF       string    `gorm:"unique;not null;index" json:"cpf"`
 	Email     string    `gorm:"unique;not null;index" json:"email"`
@@ -27,7 +27,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 }
 
 type RefreshToken struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:(gen_random_uuid())" json:"id"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
 	Token     string    `gorm:"unique;not null" json:"token"`
 	ExpiresAt time.Time `gorm:"not null" json:"expires_at"`

@@ -8,7 +8,7 @@ import (
 )
 
 type Boleto struct {
-	ID            uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID            uuid.UUID  `gorm:"type:uuid;primary_key;default:(gen_random_uuid())" json:"id"`
 	UserID        uuid.UUID  `gorm:"type:uuid;not null;index" json:"user_id"`
 	TransactionID *uuid.UUID `gorm:"type:uuid;index" json:"transaction_id,omitempty"`
 	Amount        float64    `gorm:"type:decimal(15,2);not null" json:"amount"`

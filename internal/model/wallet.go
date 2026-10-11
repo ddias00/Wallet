@@ -8,7 +8,7 @@ import (
 )
 
 type Wallet struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:(gen_random_uuid())" json:"id"`
 	UserID    uuid.UUID `gorm:"type:uuid;unique;not null;index" json:"user_id"`
 	Balance   float64   `gorm:"type:decimal(15,2);default:0" json:"balance"`
 	CreatedAt time.Time `json:"created_at"`

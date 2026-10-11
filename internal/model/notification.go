@@ -8,7 +8,7 @@ import (
 )
 
 type Notification struct {
-	ID             uuid.UUID  `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID             uuid.UUID  `gorm:"type:uuid;primary_key;default:(gen_random_uuid())" json:"id"`
 	UserID         uuid.UUID  `gorm:"type:uuid;not null;index" json:"user_id"`
 	EventType      string     `gorm:"not null;index" json:"event_type"`
 	Channel        string     `gorm:"not null;index" json:"channel"`

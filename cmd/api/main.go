@@ -23,7 +23,7 @@ import (
 
 // @title Digital Wallet API
 // @version 1.0
-// @description REST API for Digital Wallet platform with Go 1.25 + Gin + PostgreSQL + GORM
+// @description REST API for Digital Wallet platform with Go + Gin + PostgreSQL + GORM
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name API Support
@@ -44,6 +44,13 @@ func main() {
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatal("Failed to load config:", err)
+	}
+
+	if len(os.Args) == 2 && os.Args[1] == "health" {
+		if err := checkHealth(fmt.Sprintf("http://127.0.0.1:%s/health", cfg.App.Port)); err != nil {
+			log.Fatal(err)
+		}
+		return
 	}
 
 	db, err := database.Connect(database.Config{
@@ -103,4 +110,17 @@ func main() {
 	}
 
 	log.Println("Server exited")
+}
+
+func checkHealth(url string) error {
+	client := &http.Client{Timeout: 2 * time.Second}
+	resp, err := client.Get(url)
+	if err != nil {
+		return fmt.Errorf("health check failed: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("health check returned HTTP %d", resp.StatusCode)
+	}
+	return nil
 }
