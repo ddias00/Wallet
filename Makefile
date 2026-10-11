@@ -15,7 +15,7 @@ deps:
 	go mod tidy
 
 swagger:
-	swag init -g cmd/api/main.go -o docs
+	go run github.com/swaggo/swag/cmd/swag@v1.16.6 init -g cmd/api/main.go -o docs
 
 clean:
 	rm -rf bin/ tmp/ coverage coverage.out coverage.html coverage_*
@@ -51,20 +51,20 @@ coverage-func:
 
 # ----- Docker (prod) -----
 docker-up:
-	docker-compose up -d
+	docker compose up -d
 
 docker-down:
-	docker-compose down
+	docker compose down
 
 docker-logs:
-	docker-compose logs -f api
+	docker compose logs -f api
 
 docker-rebuild:
-	docker-compose up -d --build
+	docker compose up -d --build
 
 # ----- Docker (dev, hot reload via Air) -----
 docker-dev:
-	docker-compose -f docker-compose.dev.yml up
+	docker compose -f docker-compose.dev.yml up
 
 docker-dev-down:
-	docker-compose -f docker-compose.dev.yml down
+	docker compose -f docker-compose.dev.yml down

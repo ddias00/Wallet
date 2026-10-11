@@ -29,7 +29,7 @@ API REST completa para uma plataforma de carteira digital, construída em Go seg
 
 ## Tech Stack
 
-- **Linguagem**: Go 1.25
+- **Linguagem**: Go 1.27.2
 - **Framework HTTP**: Gin
 - **Banco de dados**: PostgreSQL 15
 - **ORM**: GORM
@@ -74,7 +74,7 @@ Wallet/
 
 ## Pré-requisitos
 
-- Go 1.25 ou superior
+- Go 1.27.2 ou superior
 - Docker e Docker Compose
 - PostgreSQL 15 (se rodar localmente sem Docker)
 - golang-migrate (opcional, para migrations manuais)
@@ -99,7 +99,7 @@ Edite o `.env` conforme necessário.
 ### 3. Suba tudo com Docker Compose (recomendado)
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 Isso vai subir:

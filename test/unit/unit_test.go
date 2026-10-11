@@ -18,11 +18,32 @@ func setupDB(t *testing.T) *gorm.DB {
 	if err != nil {
 		t.Fatal(err)
 	}
-	db.AutoMigrate(&model.User{}, &model.Wallet{}, &model.Transaction{}, &model.PixKey{}, &model.Boleto{}, &model.RefreshToken{})
+	if err := db.AutoMigrate(&model.User{}, &model.Wallet{}, &model.Transaction{}, &model.PixKey{}, &model.Boleto{}, &model.RefreshToken{}); err != nil {
+		t.Fatal(err)
+	}
 	return db
 }
 
 // Service Tests
+func TestRepositoryRejectsInsufficientDebit(t *testing.T) {
+	db := setupDB(t)
+	repo := repository.New(db)
+	wallet := &model.Wallet{UserID: uuid.New(), Balance: 5}
+	if err := repo.CreateWallet(wallet); err != nil {
+		t.Fatal(err)
+	}
+	if err := repo.UpdateWalletBalance(nil, wallet.ID, 10, false); err == nil {
+		t.Fatal("debit must fail when the conditional update affects no rows")
+	}
+	stored, err := repo.FindWalletByUserID(wallet.UserID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if stored.Balance != 5 {
+		t.Fatalf("rejected debit changed balance to %v", stored.Balance)
+	}
+}
+
 func TestServiceRegister(t *testing.T) {
 	db := setupDB(t)
 	repo := repository.New(db)
@@ -147,7 +168,7 @@ func TestRepositoryUser(t *testing.T) {
 	repo := repository.New(db)
 
 	user := &model.User{Name: "Test", CPF: "12345678909", Email: "test@example.com", Phone: "11987654321", Password: "hashed"}
-	
+
 	if err := repo.CreateUser(user); err != nil {
 		t.Errorf("CreateUser() error = %v", err)
 	}

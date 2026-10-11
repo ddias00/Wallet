@@ -8,7 +8,7 @@ import (
 )
 
 type PixKey struct {
-	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:gen_random_uuid()" json:"id"`
+	ID        uuid.UUID `gorm:"type:uuid;primary_key;default:(gen_random_uuid())" json:"id"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null;index" json:"user_id"`
 	Key       string    `gorm:"unique;not null;index" json:"key"`
 	Type      string    `gorm:"not null;index" json:"type"`

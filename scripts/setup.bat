@@ -7,7 +7,7 @@ echo.
 echo [1/5] Checking Go installation...
 go version
 if %errorlevel% neq 0 (
-    echo ERROR: Go is not installed. Please install Go 1.25 or higher.
+    echo ERROR: Go is not installed. Please install Go 1.27.2 or higher.
     exit /b 1
 )
 echo.
@@ -39,7 +39,7 @@ echo ========================================
 echo Next Steps:
 echo ========================================
 echo 1. Start PostgreSQL and API:
-echo    docker-compose up -d
+echo    docker compose up -d
 echo.
 echo 2. Or run API only (requires PostgreSQL running):
 echo    go run cmd/api/main.go

@@ -57,11 +57,11 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 if ($containers -notcontains 'wallet_postgres') {
-    Write-Err "Container 'wallet_postgres' nao encontrado. Rode: docker-compose up -d"
+    Write-Err "Container 'wallet_postgres' nao encontrado. Rode: docker compose up -d"
     exit 1
 }
 if ($containers -notcontains 'wallet_api') {
-    Write-Err "Container 'wallet_api' nao encontrado. Rode: docker-compose up -d"
+    Write-Err "Container 'wallet_api' nao encontrado. Rode: docker compose up -d"
     exit 1
 }
 

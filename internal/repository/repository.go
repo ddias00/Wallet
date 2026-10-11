@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -58,7 +59,14 @@ func (r *Repository) UpdateWalletBalance(tx *gorm.DB, walletID uuid.UUID, amount
 	if isCredit {
 		return db.Model(&model.Wallet{}).Where("id = ?", walletID).UpdateColumn("balance", gorm.Expr("balance + ?", amount)).Error
 	}
-	return db.Model(&model.Wallet{}).Where("id = ? AND balance >= ?", walletID, amount).UpdateColumn("balance", gorm.Expr("balance - ?", amount)).Error
+	result := db.Model(&model.Wallet{}).Where("id = ? AND balance >= ?", walletID, amount).UpdateColumn("balance", gorm.Expr("balance - ?", amount))
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected != 1 {
+		return errors.New("insufficient balance or wallet not found")
+	}
+	return nil
 }
 
 // Transaction

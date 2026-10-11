@@ -8,7 +8,7 @@ To generate the Swagger documentation, run:
 
 ```bash
 # Install swag CLI if not already installed
-go install github.com/swaggo/swag/cmd/swag@latest
+go install github.com/swaggo/swag/cmd/swag@v1.16.6
 
 # Generate docs
 swag init -g cmd/api/main.go -o docs

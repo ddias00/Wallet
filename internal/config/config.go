@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -36,8 +37,14 @@ type JWTConfig struct {
 func Load() (*Config, error) {
 	godotenv.Load()
 
-	accessExpiry, _ := time.ParseDuration(getEnv("JWT_ACCESS_EXPIRY", "15m"))
-	refreshExpiry, _ := time.ParseDuration(getEnv("JWT_REFRESH_EXPIRY", "168h"))
+	accessExpiry, err := time.ParseDuration(getEnv("JWT_ACCESS_EXPIRY", "15m"))
+	if err != nil || accessExpiry <= 0 {
+		return nil, fmt.Errorf("JWT_ACCESS_EXPIRY must be a positive Go duration, for example 15m")
+	}
+	refreshExpiry, err := time.ParseDuration(getEnv("JWT_REFRESH_EXPIRY", "168h"))
+	if err != nil || refreshExpiry <= 0 {
+		return nil, fmt.Errorf("JWT_REFRESH_EXPIRY must be a positive Go duration, for example 168h")
+	}
 
 	return &Config{
 		App: AppConfig{
